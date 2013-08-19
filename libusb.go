@@ -159,3 +159,21 @@ func (self *Device) ControlMsg(reqtype int, req int, value int, index int, dat [
 		C.int(len(dat)),
 		C.int(self.timeout)))
 }
+
+func (self *Device) Driver(ifc int) (int, string) {
+	buf := make([]C.char, 256)
+	retval := int(C.usb_get_driver_np(
+		self.handle,
+		C.int(ifc),
+		&buf[0],
+		C.uint(len(buf))))
+	if retval == 0 {
+		return retval, C.GoString(&buf[0])
+	}
+
+	return retval, ""
+}
+
+func (self *Device) Detach(ifc int) int {
+	return int(C.usb_detach_kernel_driver_np(self.handle, C.int(ifc)))
+}
